@@ -9,9 +9,6 @@ from Crypto.Util.Padding import unpad
 import aes_manual as amanual
 
 
-# ---------------------------------------------------------------------------
-# Helper: AES-CBC library, dipakai HANYA untuk membuka pesan dari KDC
-# ---------------------------------------------------------------------------
 def normalize_key(ascii_key: str) -> bytes:
     kb = ascii_key.encode("ascii", errors="ignore")
     if len(kb) < 16:
@@ -28,9 +25,6 @@ def lib_aes_decrypt(iv_hex, ct_hex, ascii_key):
     return json.loads(pt.decode())
 
 
-# ---------------------------------------------------------------------------
-# Socket helpers (protokol: 1 JSON per baris, dipisah '\n')
-# ---------------------------------------------------------------------------
 def send_json(conn, obj):
     conn.sendall((json.dumps(obj) + "\n").encode())
 
@@ -53,9 +47,6 @@ class LineReader:
         return json.loads(line.decode())
 
 
-# ---------------------------------------------------------------------------
-# Fase chat: dua arah, sender & receiver sekaligus, AES MANUAL dgn Ks
-# ---------------------------------------------------------------------------
 def chat_loop(conn, reader: LineReader, my_id, peer_id, ks_holder):
     """ks_holder = dict {'ks': <str>} supaya Ks bisa diganti interaktif
     (misal mau test apa yang terjadi kalau key beda / salah) tanpa restart."""
@@ -116,9 +107,6 @@ def chat_loop(conn, reader: LineReader, my_id, peer_id, ks_holder):
     print(f"[{my_id}] Chat selesai.")
 
 
-# ---------------------------------------------------------------------------
-# Role: INITIATOR  (langkah 1,3,5 — dia yang memulai ke KDC lalu ke peer)
-# ---------------------------------------------------------------------------
 def run_initiator():
     print("=== Mode: INITIATOR (contoh: Alice) ===")
     my_id = input("ID saya (misal ALICE): ").strip().upper()
@@ -180,9 +168,7 @@ def run_initiator():
     chat_loop(conn, reader, my_id, peer_id, ks_holder)
 
 
-# ---------------------------------------------------------------------------
-# Role: RESPONDER (langkah 3(terima),4,5(verifikasi) — dia yang menunggu)
-# ---------------------------------------------------------------------------
+
 def run_responder():
     print("=== Mode: RESPONDER (contoh: Bob) ===")
     my_id = input("ID saya (misal BOB): ").strip().upper()
@@ -234,7 +220,6 @@ def run_responder():
     chat_loop(conn, reader, my_id, peer_id, ks_holder)
 
 
-# ---------------------------------------------------------------------------
 def main():
     print("=== Peer Program (dipakai utk Alice maupun Bob) ===")
     print("  1) INITIATOR  (mulai ke KDC lebih dulu, lalu hubungi peer)  -> role 'Alice'")
